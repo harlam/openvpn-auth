@@ -1,3 +1,4 @@
 container.php
 /vendor
 composer.lock
+*.log

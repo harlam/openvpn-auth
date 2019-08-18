@@ -10,10 +10,6 @@ use Pimple\Container;
 
 require_once 'vendor/autoload.php';
 
-putenv("username=test");
-putenv("password=test");
-putenv("untrusted_ip=192.168.0.1");
-
 try {
     /** @var Container $container */
     $container = require_once 'container.php';
@@ -34,7 +30,7 @@ try {
 } catch (AuthenticationException $authException) {
     $authLog->fail($authRequest, $authException->getMessage());
 } catch (Exception $exception) {
-    /** log exceptions */
-    print_r($exception->getMessage() . PHP_EOL);
+    $message = date('c') . " Error {$exception->getMessage()}, File: {$exception->getFile()}, Line: {$exception->getLine()}" . PHP_EOL;
+    error_log($message, 3, 'error.log');
 }
 exit(1);

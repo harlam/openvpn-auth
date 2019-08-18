@@ -10,6 +10,20 @@ class AuthRequestBuilder
 {
     /**
      * @return AuthRequest
+     */
+    public static function buildTest(): AuthRequest
+    {
+        $request = new AuthRequest();
+
+        $request->setUsername('test')
+            ->setPassword('test')
+            ->setRemoteIp('192.168.0.1');
+
+        return $request;
+    }
+
+    /**
+     * @return AuthRequest
      * @throws BaseException
      */
     public static function buildFromEnvironment(): AuthRequest
