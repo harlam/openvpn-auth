@@ -1,0 +1,26 @@
+{
+  "name": "harlam/openvpn-auth",
+  "type": "project",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "harlam",
+      "email": "harlamov.nikolay@yandex.ru"
+    }
+  ],
+  "require": {
+    "php": ">=7.1",
+    "harlam/password": "^1.0",
+    "pimple/pimple": "^3.2"
+  },
+  "autoload": {
+    "psr-4": {
+      "harlam\\OpenVPN\\": "src"
+    }
+  },
+  "scripts": {
+    "post-create-project-cmd": [
+      "php -r \"copy('container.dist.php', 'container.php');\""
+    ]
+  }
+}
