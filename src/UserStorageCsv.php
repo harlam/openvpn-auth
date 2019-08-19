@@ -15,11 +15,12 @@ class UserStorageCsv implements UserStorageInterface
      * @param string $username
      * @return User
      * @throws UserNotFoundException
+     * @throws BaseException
      */
     public function findByUsername(string $username): User
     {
-        if (($handle = fopen($this->filename, "r")) === false) {
-            throw new UserNotFoundException('Storage error');
+        if (($handle = @fopen($this->filename, "r")) === false) {
+            throw new BaseException("Storage not initialized in '{$this->filename}'");
         }
 
         while (($data = fgetcsv($handle, 1000, ",")) !== false) {
