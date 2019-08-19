@@ -2,10 +2,11 @@
 
 namespace harlam\OpenVPN;
 
+use DateTime;
+use DateTimeZone;
+
 class User
 {
-    /** @var integer */
-    public $id;
     /** @var string */
     public $username;
     /** @var string */
@@ -14,14 +15,6 @@ class User
     public $is_active;
     /** @var string */
     public $created_at;
-
-    /**
-     * @return int
-     */
-    public function getId(): int
-    {
-        return $this->id;
-    }
 
     /**
      * @return string
@@ -48,10 +41,16 @@ class User
     }
 
     /**
-     * @return string
+     * @return DateTime
      */
-    public function getCreatedAt(): string
+    public function getCreatedAt(): ?DateTime
     {
-        return $this->created_at;
+        $result = DateTime::createFromFormat('Y-m-d H:i:s.u', $this->created_at, new DateTimeZone('UTC'));
+
+        if ($result === false) {
+            return null;
+        }
+
+        return $result;
     }
 }

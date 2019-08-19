@@ -43,6 +43,7 @@ $container['storage.user'] = function (Container $container) {
     /** @var PDO $pdo */
     $pdo = $container['pdo'];
 
+//    return new UserStorageCsv('users.csv');
     return new UserStorage($pdo);
 };
 
@@ -87,6 +88,7 @@ $container['service.auth.log'] = function (Container $container) {
     /** @var PDO $pdo */
     $pdo = $container['pdo'];
 
+//    return new AuthLogFile('auth');
     return new AuthLog($pdo);
 };
 
