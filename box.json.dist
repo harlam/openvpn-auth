@@ -1,0 +1,14 @@
+{
+  "directories": [
+    "src",
+    "vendor"
+  ],
+  "files": [
+    "container.php",
+    "openvpn-auth.php"
+  ],
+  "main": "openvpn-auth.php",
+  "output": "openvpn-auth.phar",
+  "stub": true,
+  "chmod": "0755"
+}

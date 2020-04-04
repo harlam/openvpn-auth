@@ -23,7 +23,8 @@
   "scripts": {
     "post-create-project-cmd": [
       "php -r \"copy('container.dist.php', 'container.php');\"",
-      "php -r \"copy('.env.dist', '.env');\""
+      "php -r \"copy('.env.dist', '.env');\"",
+      "php -r \"copy('box.json.dist', 'box.json');\""
     ]
   }
 }

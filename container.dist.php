@@ -18,6 +18,10 @@ $container = new Container();
  * @return Dotenv
  */
 $container[Dotenv::class] = function () {
+    /** Mount .env from external if phar */
+    if (($dir = dirname(Phar::running(false))) !== '') {
+        Phar::mount('/.env', $dir . DIRECTORY_SEPARATOR . '.env');
+    }
     return Dotenv::createImmutable(__DIR__);
 };
 

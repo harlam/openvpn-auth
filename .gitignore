@@ -2,3 +2,5 @@
 vendor
 container.php
 composer.lock
+box.json
+openvpn-auth.phar
