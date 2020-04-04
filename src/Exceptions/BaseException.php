@@ -1,6 +1,6 @@
 <?php
 
-namespace harlam\OpenVPN;
+namespace harlam\OpenVPN\Auth\Exceptions;
 
 use Exception;
 

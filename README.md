@@ -32,7 +32,6 @@ create table auth_log
 (
   id         bigserial primary key,
   username   varchar(255)                default null,
-  password   varchar(255)                default null,
   ip_addr    varchar(15)                 default null,
   is_success boolean not null,
   details    varchar(1024),

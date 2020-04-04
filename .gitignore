@@ -1,4 +1,4 @@
+.env
+vendor
 container.php
-/vendor
 composer.lock
-*.log

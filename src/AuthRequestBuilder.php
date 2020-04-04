@@ -1,6 +1,8 @@
 <?php
 
-namespace harlam\OpenVPN;
+namespace harlam\OpenVPN\Auth;
+
+use harlam\OpenVPN\Auth\Exceptions\BaseException;
 
 /**
  * Authentication request builder
@@ -10,26 +12,10 @@ class AuthRequestBuilder
 {
     /**
      * @return AuthRequest
-     */
-    public static function buildTest(): AuthRequest
-    {
-        $request = new AuthRequest();
-
-        $request->setUsername('test')
-            ->setPassword('test')
-            ->setRemoteIp('192.168.0.1');
-
-        return $request;
-    }
-
-    /**
-     * @return AuthRequest
      * @throws BaseException
      */
-    public static function buildFromEnvironment(): AuthRequest
+    public static function buildFromEnvironment()
     {
-        $request = new AuthRequest();
-
         if (($username = getenv('username')) === false) {
             throw new BaseException('Environment variable \'username\' is not present');
         }
@@ -42,10 +28,6 @@ class AuthRequestBuilder
             throw new BaseException('Environment variable \'untrusted_ip\' is not present');
         }
 
-        $request->setUsername($username)
-            ->setPassword($password)
-            ->setRemoteIp($remoteIp);
-
-        return $request;
+        return new AuthRequest($username, $password, $remoteIp);
     }
 }

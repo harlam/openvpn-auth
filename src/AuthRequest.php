@@ -1,21 +1,39 @@
 <?php
 
-namespace harlam\OpenVPN;
+namespace harlam\OpenVPN\Auth;
 
 /**
- * Authentication request
+ * OpenVPN authentication request
  * @package harlam\OpenVPN
  */
 class AuthRequest
 {
+    /** @var string */
     protected $username;
+
+    /** @var string */
     protected $password;
+
+    /** @var string */
     protected $remoteIp;
+
+    /**
+     * AuthRequest constructor.
+     * @param string $username
+     * @param string $password
+     * @param string $remoteIp
+     */
+    public function __construct($username, $password, $remoteIp)
+    {
+        $this->username = $username;
+        $this->password = $password;
+        $this->remoteIp = $remoteIp;
+    }
 
     /**
      * @return string
      */
-    public function getUsername(): string
+    public function getUsername()
     {
         return $this->username;
     }
@@ -23,7 +41,7 @@ class AuthRequest
     /**
      * @return string
      */
-    public function getPassword(): string
+    public function getPassword()
     {
         return $this->password;
     }
@@ -31,38 +49,13 @@ class AuthRequest
     /**
      * @return string|null
      */
-    public function getRemoteIp(): ?string
+    public function getRemoteIp()
     {
         return $this->remoteIp;
     }
 
-    /**
-     * @param string $username
-     * @return AuthRequest
-     */
-    public function setUsername(string $username): self
+    public function __toString()
     {
-        $this->username = $username;
-        return $this;
-    }
-
-    /**
-     * @param string $password
-     * @return AuthRequest
-     */
-    public function setPassword(string $password): self
-    {
-        $this->password = $password;
-        return $this;
-    }
-
-    /**
-     * @param string|null $remoteIp
-     * @return AuthRequest
-     */
-    public function setRemoteIp(?string $remoteIp): self
-    {
-        $this->remoteIp = $remoteIp;
-        return $this;
+        return "Username: {$this->username}, Remote IP: {$this->remoteIp}";
     }
 }

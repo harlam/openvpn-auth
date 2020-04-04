@@ -1,95 +1,74 @@
 <?php
 
-use harlam\OpenVPN\AuthLog;
-use harlam\OpenVPN\AuthLogInterface;
-use harlam\OpenVPN\AuthRequestBuilder;
-use harlam\OpenVPN\AuthService;
-use harlam\OpenVPN\AuthServiceInterface;
-use harlam\OpenVPN\BaseException;
-use harlam\OpenVPN\UserStorage;
-use harlam\OpenVPN\UserStorageInterface;
-use harlam\Password\Interfaces\PasswordInterface;
-use harlam\Password\Password;
+use Dotenv\Dotenv;
+use harlam\OpenVPN\Auth\AuthLogDatabase;
+use harlam\OpenVPN\Auth\AuthRequest;
+use harlam\OpenVPN\Auth\AuthRequestBuilder;
+use harlam\OpenVPN\Auth\AuthService;
+use harlam\OpenVPN\Auth\Interfaces\AuthLogInterface;
+use harlam\OpenVPN\Auth\Interfaces\AuthServiceInterface;
+use harlam\OpenVPN\Users\Interfaces\StorageInterface;
+use harlam\OpenVPN\Users\UserStorageDatabase;
 use Pimple\Container;
+use Pimple\Psr11\Container as PsrContainer;
 
 $container = new Container();
 
 /**
- * PDO-подключение к базе данных
- * @return PDO
+ * @return Dotenv
  */
-$container['pdo'] = function () {
-    $dsn = 'pgsql:host=localhost;port=5432;dbname=openvpn';
-    $username = 'postgres';
-    $password = 'secret';
-
-    return new PDO($dsn, $username, $password);
+$container[Dotenv::class] = function () {
+    return Dotenv::createImmutable(__DIR__);
 };
 
 /**
- * Builder запроса на авторизацию
- * @return \harlam\OpenVPN\AuthRequest
+ * OpenVPN Auth-request builder
+ * @return AuthRequest
  */
-$container['builder.authRequest'] = $container->factory(function () {
+$container[AuthRequest::class] = $container->factory(function () {
     return AuthRequestBuilder::buildFromEnvironment();
 });
 
 /**
- * Хранилище пользователей
- * @param Container $container
- * @return UserStorageInterface
+ * PDO
+ * @return AuthRequest
  */
-$container['storage.user'] = function (Container $container) {
+$container[PDO::class] = $container->factory(function () {
+    return new PDO(getenv('PDO_DSN'), getenv('PDO_USERNAME'), getenv('PDO_PASSWORD'));
+});
+
+/**
+ * Users storage
+ * @param Container $container
+ * @return StorageInterface
+ */
+$container[StorageInterface::class] = function (Container $container) {
     /** @var PDO $pdo */
-    $pdo = $container['pdo'];
+    $pdo = $container[PDO::class];
 
-//    return new UserStorageCsv('users.csv');
-    return new UserStorage($pdo);
-};
-
-/**
- * Сервис для работы с паролями
- * @return PasswordInterface
- */
-$container['service.password'] = function () {
-    $passwordService = (new Password())
-        ->setPasswordLength(16, 64)
-        ->setPasswordComplexity(function (string $password) {
-            if (preg_match('/[A-Z]/', $password) !== 1) {
-                throw new BaseException('Пароль должен содержать хотя-бы одну заглавную букву');
-            }
-        })->setPasswordComplexity(function (string $password) {
-            if (preg_match('/[0-9]/', $password) !== 1) {
-                throw new BaseException('Пароль должен содержать хотя-бы одну цифру');
-            }
-        });
-
-    return $passwordService;
-};
-
-/**
- * @param Container $container
- * @return AuthServiceInterface
- */
-$container['service.auth'] = function (Container $container) {
-    /** @var UserStorageInterface $storage */
-    $storage = $container['storage.user'];
-    /** @var PasswordInterface $passwordService */
-    $passwordService = $container['service.password'];
-
-    return new AuthService($storage, $passwordService);
+    return new UserStorageDatabase($pdo);
 };
 
 /**
  * @param Container $container
  * @return AuthLogInterface
  */
-$container['service.auth.log'] = function (Container $container) {
+$container[AuthLogInterface::class] = function (Container $container) {
     /** @var PDO $pdo */
-    $pdo = $container['pdo'];
+    $pdo = $container[PDO::class];
 
-//    return new AuthLogFile('auth');
-    return new AuthLog($pdo);
+    return new AuthLogDatabase($pdo);
 };
 
-return $container;
+/**
+ * @param Container $container
+ * @return AuthServiceInterface
+ */
+$container[AuthServiceInterface::class] = function (Container $container) {
+    /** @var StorageInterface $storage */
+    $storage = $container[StorageInterface::class];
+
+    return new AuthService($storage);
+};
+
+return new PsrContainer($container);

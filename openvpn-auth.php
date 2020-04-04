@@ -1,27 +1,36 @@
 #!/usr/bin/env php
-
 <?php
 
-use harlam\OpenVPN\AuthenticationException;
-use harlam\OpenVPN\AuthLogInterface;
-use harlam\OpenVPN\AuthRequest;
-use harlam\OpenVPN\AuthServiceInterface;
-use Pimple\Container;
+use Dotenv\Dotenv;
+use harlam\OpenVPN\Auth\AuthRequest;
+use harlam\OpenVPN\Auth\Exceptions\AuthenticationException;
+use harlam\OpenVPN\Auth\Interfaces\AuthLogInterface;
+use harlam\OpenVPN\Auth\Interfaces\AuthServiceInterface;
+use Pimple\Psr11\Container;
 
 require_once 'vendor/autoload.php';
+
+$errorLogFile = 'error.log';
 
 try {
     /** @var Container $container */
     $container = require_once 'container.php';
 
+    /** @var Dotenv $env */
+    $env = $container->get(Dotenv::class);
+    $env->load();
+
+    /** @var string $errorLogFile Override errors file path */
+    $errorLogFile = ($l = getenv('ERROR_LOG_FILE')) === false ? $errorLogFile : $l;
+
     /** @var AuthServiceInterface $authService */
-    $authService = $container['service.auth'];
+    $authService = $container->get(AuthServiceInterface::class);
 
     /** @var AuthLogInterface $authLog */
-    $authLog = $container['service.auth.log'];
+    $authLog = $container->get(AuthLogInterface::class);
 
     /** @var AuthRequest $authRequest */
-    $authRequest = $container['builder.authRequest'];
+    $authRequest = $container->get(AuthRequest::class);
 
     $authService->authenticate($authRequest);
 
@@ -31,6 +40,6 @@ try {
     $authLog->fail($authRequest, $authException->getMessage());
 } catch (Exception $exception) {
     $message = date('c') . " Error {$exception->getMessage()}, File: {$exception->getFile()}, Line: {$exception->getLine()}" . PHP_EOL;
-    error_log($message, 3, 'error.log');
+    error_log($message, 3, $errorLogFile);
 }
 exit(1);

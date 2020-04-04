@@ -1,10 +1,11 @@
 <?php
 
-namespace harlam\OpenVPN;
+namespace harlam\OpenVPN\Auth;
 
+use harlam\OpenVPN\Auth\Interfaces\AuthLogInterface;
 use PDO;
 
-class AuthLog implements AuthLogInterface
+class AuthLogDatabase implements AuthLogInterface
 {
     protected $pdo;
 
@@ -17,7 +18,7 @@ class AuthLog implements AuthLogInterface
      * @param AuthRequest $request
      * @param string|null $details
      */
-    public function success(AuthRequest $request, string $details = null): void
+    public function success(AuthRequest $request, $details = null)
     {
         $this->log($request, true, $details);
     }
@@ -26,22 +27,24 @@ class AuthLog implements AuthLogInterface
      * @param AuthRequest $request
      * @param string|null $details
      */
-    public function fail(AuthRequest $request, string $details = null): void
+    public function fail(AuthRequest $request, $details = null)
     {
         $this->log($request, false, $details);
     }
 
-    protected function log(AuthRequest $request, bool $success, string $details = null): void
+    /**
+     * @param AuthRequest $request
+     * @param $success
+     * @param null|string $details
+     */
+    protected function log(AuthRequest $request, $success, $details = null)
     {
-        $sql = 'insert into auth_log(username, password, ip_addr, is_success, details) values'
-            . '(:username, :password, :remote_ip, :success, :details);';
+        $sql = 'insert into auth_log(username, ip_addr, is_success, details) values'
+            . '(:username, :remote_ip, :success, :details);';
 
         $query = $this->pdo->prepare($sql);
 
-        $password = $success === true ? '<hidden>' : $request->getPassword();
-
         $query->bindValue('username', $request->getUsername(), PDO::PARAM_STR);
-        $query->bindValue('password', $password, PDO::PARAM_STR);
         $query->bindValue('remote_ip', $request->getRemoteIp(), PDO::PARAM_STR);
         $query->bindValue('success', $success, PDO::PARAM_BOOL);
         $query->bindValue('details', $details, PDO::PARAM_STR);

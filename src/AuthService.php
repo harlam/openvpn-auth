@@ -1,25 +1,34 @@
 <?php
 
-namespace harlam\OpenVPN;
+namespace harlam\OpenVPN\Auth;
 
-use harlam\Password\Interfaces\PasswordInterface;
+use harlam\OpenVPN\Auth\Exceptions\AuthenticationException;
+use harlam\OpenVPN\Auth\Interfaces\AuthServiceInterface;
+use harlam\OpenVPN\Users\Exceptions\UserNotFoundException;
+use harlam\OpenVPN\Users\Interfaces\StorageInterface;
 
+/**
+ * Class AuthService
+ * @package harlam\OpenVPN\Auth
+ */
 class AuthService implements AuthServiceInterface
 {
     protected $userStorage;
-    protected $passwordService;
 
-    public function __construct(UserStorageInterface $userStorage, PasswordInterface $passwordService)
+    /**
+     * AuthService constructor.
+     * @param StorageInterface $userStorage
+     */
+    public function __construct(StorageInterface $userStorage)
     {
         $this->userStorage = $userStorage;
-        $this->passwordService = $passwordService;
     }
 
     /**
      * @param AuthRequest $authRequest
      * @throws AuthenticationException
      */
-    public function authenticate(AuthRequest $authRequest): void
+    public function authenticate(AuthRequest $authRequest)
     {
         try {
             $user = $this->userStorage->findByUsername($authRequest->getUsername());
@@ -28,14 +37,10 @@ class AuthService implements AuthServiceInterface
         }
 
         if ($user->is_active !== true) {
-            throw new AuthenticationException("User '{$user->getUsername()}' is not active");
+            throw new AuthenticationException("User '{$user->getUsername()}' inactive");
         }
 
-        $passwordIsValid = $this->passwordService
-            ->setPassword($authRequest->getPassword())
-            ->verify($user->getPassword());
-
-        if ($passwordIsValid === false) {
+        if (password_verify($authRequest->getPassword(), $user->getPassword()) === false) {
             throw new AuthenticationException("Invalid password for user '{$user->getUsername()}'");
         }
     }
