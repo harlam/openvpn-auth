@@ -1,19 +1,24 @@
 openvpn-auth
 ------------
 
-Аутентификационный скрипт для сервера OpenVPN
+OpenVPN authentication script
 
-Установка
----------
+Install
+-------
 
 ```bash
 composer create-project harlam/openvpn-auth
 ```
 
-Выполнить sql
+Configure
+---------
+
+- Edit `container.php` and `.env`
+
+- Create tables (if use database instead files)
 
 ```postgresql
--- Создание таблицы пользователей
+-- OpenVPN users
 create table users
 (
   id         bigserial primary key,
@@ -27,7 +32,7 @@ create index idx_users_username on users (username);
 create index idx_users_is_active on users (is_active);
 create index idx_users_created_at on users (created_at);
 
--- Создание таблицы с логами авторизации
+-- Auth logs
 create table auth_log
 (
   id         bigserial primary key,
@@ -44,18 +49,19 @@ create index idx_auth_log_is_success on auth_log (is_success);
 create index idx_auth_log_created_at on auth_log (created_at);
 ```
 
-Конфигурирование
-----------------
+- Install kherge/box, (edit `box.json`) and build phar (https://packagist.org/packages/kherge/box)
 
-Отредактируйте `container.php`
+`php box.phar build`
 
-Использование
--------------
+- Move `openvpn-auth.phar` and `.env` to new destination
 
-Конфигурация OpenVPN:
+Use
+---
+
+In OpenVPN server config:
 
 ```
 ...
-auth-user-pass-verify "/etc/openvpn-auth/openvpn-auth.php" via-env
+auth-user-pass-verify "/etc/openvpn-auth/openvpn-auth.phar" via-env
 ...
 ```
