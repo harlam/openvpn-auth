@@ -35,11 +35,11 @@ $container[AuthRequest::class] = $container->factory(function () {
 
 /**
  * PDO
- * @return AuthRequest
+ * @return PDO
  */
-$container[PDO::class] = $container->factory(function () {
+$container[PDO::class] = function () {
     return new PDO(getenv('PDO_DSN'), getenv('PDO_USERNAME'), getenv('PDO_PASSWORD'));
-});
+};
 
 /**
  * Users storage
